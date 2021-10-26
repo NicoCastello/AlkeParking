@@ -26,6 +26,7 @@ struct Parking {
     let maxVehicles = 20
     let fractionOfMinutes = 15
     let fractionValue = 5
+    let discount = 15
     var accumulated: (vehicles: Int,profits: Int) = (0,0)
     var currentVehicle: VehicleType?
     var price: Int {
@@ -74,14 +75,14 @@ struct Parking {
             onError()
             return
         }
-        bill = calculateBill(parkedTime: foundVehicle.parkedTime, vehicleType: foundVehicle.type)
+        bill = calculateBill(parkedTime: foundVehicle.parkedTime, vehicleType: foundVehicle.type, discountCode: foundVehicle.discountCard)
         accumulated.vehicles += 1
         accumulated.profits += bill
         onSuccess(bill)
         vehicles.remove(foundVehicle)
     }
     
-    mutating func calculateBill(parkedTime: Int, vehicleType: VehicleType) -> Int {
+    mutating func calculateBill(parkedTime: Int, vehicleType: VehicleType, discountCode: String?) -> Int {
         currentVehicle = vehicleType
         var billValue: Int = 0
         let hours: Int = Int(parkedTime / 60)
@@ -97,6 +98,11 @@ struct Parking {
                 blocks += 1
             }
             billValue = price + fractionValue * blocks
+        }
+        
+        if let _ = discountCode {
+            let discountValue: Int = Int(billValue * discount / 100)
+            billValue = billValue - discountValue
         }
         return billValue
     }
