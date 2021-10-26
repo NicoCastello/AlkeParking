@@ -93,7 +93,7 @@ struct Parking {
         } else {
             let minutesRemaining = parkedTime - hours * 60
             var blocks = minutesRemaining / fractionOfMinutes
-            if blocks % fractionOfMinutes != 0 {
+            if minutesRemaining % fractionOfMinutes != 0 {
                 blocks += 1
             }
             billValue = price + fractionValue * blocks
