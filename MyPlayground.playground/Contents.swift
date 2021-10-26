@@ -96,7 +96,7 @@ struct Parking {
             if minutesRemaining % fractionOfMinutes != 0 {
                 blocks += 1
             }
-            billValue = price + fractionValue * blocks
+            billValue = price * hours + fractionValue * blocks
         }
         
         if let _ = discountCode {
