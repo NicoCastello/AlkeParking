@@ -89,9 +89,8 @@ struct Parking {
         if parkedTime <= 120 {
             return price
         } else if parkedTime % 60 == 0 {
-            billValue = parkedTime * hours
+            billValue = price * hours
         } else {
-            
             let minutesRemaining = parkedTime - hours * 60
             var blocks = minutesRemaining / fractionOfMinutes
             if blocks % fractionOfMinutes != 0 {
@@ -189,7 +188,6 @@ var registerVehicles: [Vehicle] = [
     VehicleType.moto, checkInTime: Date(), discountCard:
     nil)
 ]
-
 
 for vehicle in registerVehicles {
     alkeParking.checkInVehicle(vehicle, onFinish: {
