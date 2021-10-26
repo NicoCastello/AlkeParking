@@ -1,4 +1,5 @@
 import UIKit
+import Foundation
 
 enum VehicleType: String {
     case car, moto, minibus, bus
@@ -23,6 +24,9 @@ struct Parking {
     // There cannot be 2 equal cars because the sets do not accept repeated values
     var vehicles: Set<Vehicle> = []
     let maxVehicles = 20
+    let fractionOfMinutes = 15
+    let fractionValue = 5
+    var accumulated: (vehicles: Int,profits: Int) = (0,0)
     var currentVehicle: VehicleType?
     var price: Int {
         get {
@@ -43,6 +47,17 @@ struct Parking {
         }
     }
     
+    func getProfits() {
+        let profitMenssage = "\(accumulated.vehicles) vehicles have checked out and have earnings of $\(accumulated.profits)"
+        print(profitMenssage)
+    }
+    
+    func listPlate() {
+        for vehicle in vehicles {
+            print("plate: \(vehicle.plate)")
+        }
+    }
+    
     mutating func checkInVehicle(_ vehicle: Vehicle, onFinish:
     (Bool) -> Void) {
         if vehicles.count < maxVehicles {
@@ -50,6 +65,40 @@ struct Parking {
         } else {
             onFinish(false)
         }
+    }
+    
+    mutating func checkOutVehicle(plate: String, onSuccess: (Int) -> Void, onError: ()-> Void) {
+        var bill: Int = 0
+        let foundVehicle = vehicles.filter {$0.plate == plate}
+        guard let foundVehicle = foundVehicle.first else {
+            onError()
+            return
+        }
+        bill = calculateBill(parkedTime: foundVehicle.parkedTime, vehicleType: foundVehicle.type)
+        accumulated.vehicles += 1
+        accumulated.profits += bill
+        onSuccess(bill)
+        vehicles.remove(foundVehicle)
+    }
+    
+    mutating func calculateBill(parkedTime: Int, vehicleType: VehicleType) -> Int {
+        currentVehicle = vehicleType
+        var billValue: Int = 0
+        let hours: Int = Int(parkedTime / 60)
+        if parkedTime <= 120 {
+            return price
+        } else if parkedTime % 60 == 0 {
+            billValue = parkedTime * hours
+        } else {
+            
+            let minutesRemaining = parkedTime - hours * 60
+            var blocks = minutesRemaining / fractionOfMinutes
+            if blocks % fractionOfMinutes != 0 {
+                blocks += 1
+            }
+            billValue = price + fractionValue * blocks
+        }
+        return billValue
     }
 }
 
@@ -68,7 +117,6 @@ struct Vehicle: Parkable, Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(plate)
     }
-    
     static func ==(lhs: Vehicle, rhs: Vehicle) -> Bool {
         return lhs.plate == rhs.plate
     }
@@ -147,7 +195,12 @@ for vehicle in registerVehicles {
         }
     })
 }
+alkeParking.checkOutVehicle(plate: "AG432PP", onSuccess: { billValue in
+    print( "Your fee is $\(billValue). Come back soon")}, onError: { print("Sorry, the check-out failed")})
 
+alkeParking.checkOutVehicle(plate: "AC949PO", onSuccess: { billValue in
+    print( "Your fee is $\(billValue). Come back soon")}, onError: { print("Sorry, the check-out failed")})
 
-
+alkeParking.getProfits()
+alkeParking.listPlate()
 
